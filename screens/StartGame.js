@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, TouchableWithoutFeedback, 
+    Keyboard, Alert } from 'react-native';
 import Card from '../components/Card';
 import Input from '../components/Input';
 import NumberContainer from '../components/NumberContainer';
 import Colors from '../constants/Colors';
+import BodyText from '../components/BodyText';
+import MyButton from '../components/MyButton';
 
 const StartGame = props => {
     const [enteredValue, setEnteredValue] = useState('');
@@ -37,7 +40,9 @@ const StartGame = props => {
             <Card style={styles.summaryContainer}>
                 <Text>You selected</Text>
                 <NumberContainer>{selectedNumber}</NumberContainer>
-                <Button title="Start Game" onPress={() => props.onStartGame(selectedNumber)} />
+                <MyButton onPress={() => props.onStartGame(selectedNumber)}>
+                    Start Game
+                </MyButton>
             </Card>
         );
     }
@@ -47,9 +52,9 @@ const StartGame = props => {
             Keyboard.dismiss();
         }}>
             <View style={styles.screen}>
-                <Text style={styles.title}>Start a new game</Text>
+                <BodyText style={styles.title}>Start a new game</BodyText>
                 <Card style={styles.inputContainer}>
-                    <Text>Select a Number</Text>
+                    <BodyText style={styles.text}>Select a Number</BodyText>
                     <Input style={styles.input} 
                         blurOnSubmit 
                         autoCapitalize='none'
@@ -82,7 +87,8 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 20,
-        marginVertical: 10,        
+        marginVertical: 10,    
+        fontFamily: 'open-sans'
     },
     buttonContainer: {
         flexDirection: 'row',
