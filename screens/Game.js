@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Button, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, FlatList, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import NumberContainer from '../components/NumberContainer';
 import Card from '../components/Card';
 import BodyText from '../components/BodyText';
+import MyButton from '../components/MyButton';
 
 const generateRandomBetween = (min, max, exclude) => {
     min = Math.ceil(min);
@@ -16,11 +18,17 @@ const generateRandomBetween = (min, max, exclude) => {
     }
 };
 
+const renderListItem = (listLength, itemData) => (
+    <View style={styles.listItem}>
+        <BodyText>#{listLength - itemData.index}</BodyText>
+        <BodyText>{itemData.item}</BodyText>
+    </View>
+);
+
 const Game = props => {
-    const [currentGuess, setCurrentGuess] = useState(
-        generateRandomBetween(1, 100, props.userChoice)
-    );
-    const [rounds, setRounds] = useState(0);
+    const initalGuess = generateRandomBetween(1, 100, props.userChoice);
+    const [currentGuess, setCurrentGuess] = useState(initalGuess);
+    const [pastGuesses, setPastGuesses] = useState([initalGuess.toString()]);
     // limites possíveis para inserção do número
     // esse hook serve para manter o valor sem necessidade de renderização do componente
     const currentLow = useRef(1);
@@ -30,7 +38,7 @@ const Game = props => {
 
     useEffect(() => {
         if (currentGuess === userChoice) {
-            onGameOver(rounds);
+            onGameOver(pastGuesses.length);
         }
     }, [currentGuess, userChoice, onGameOver]);
 
@@ -45,11 +53,14 @@ const Game = props => {
         if (direction === 'lower') {
             currentHigh.current = currentGuess;
         } else {
-            currentLow.current = currentGuess;
+            currentLow.current = currentGuess + 1;
         }
         const nextNumber = generateRandomBetween(currentLow.current, currentHigh.current, currentGuess);
         setCurrentGuess(nextNumber);
-        setRounds(curRounds => curRounds + 1);
+        setPastGuesses(curPastGuesses => [
+            nextNumber.toString(), 
+            ...curPastGuesses
+        ]);        
     }
 
     return (
@@ -57,9 +68,21 @@ const Game = props => {
             <BodyText>Opponent's Guess</BodyText>
             <NumberContainer>{currentGuess}</NumberContainer>
             <Card style={styles.buttonContainer}>
-                <Button title="LOWER" onPress={nextGuessHandler.bind(this, 'lower')} />
-                <Button title="GREATER" onPress={nextGuessHandler.bind(this, 'greater')} />
-            </Card>
+                <MyButton onPress={nextGuessHandler.bind(this, 'lower')}>
+                    <Ionicons name="md-remove" size={24} color="white" />
+                </MyButton>
+                <MyButton onPress={nextGuessHandler.bind(this, 'greater')}>
+                    <Ionicons name="md-add" size={24} color="white" />
+                </MyButton>
+            </Card>            
+            <View style={styles.listContainer}>
+                <FlatList 
+                    keyExtractor={item => item}
+                    data={pastGuesses}
+                    renderItem={renderListItem.bind(this, pastGuesses.length)}
+                    contentContainerStyle={styles.list}
+                />
+            </View>
         </View>
     )
 }
@@ -76,6 +99,24 @@ const styles = StyleSheet.create({
         marginTop: 20,
         width: 300,
         maxWidth: '80%'
+    },
+    listContainer: {
+        flex: 1,
+        width: '60%'
+    },
+    list: {
+        flexGrow: 1,        
+        justifyContent: 'flex-end'
+    },
+    listItem: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 15,
+        marginVertical: 10,
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%'
     }
 });
 
