@@ -1,50 +1,30 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, Button } from 'react-native';
-import GoalItem from './components/GoalItem';
-import GoalInput from './components/GoalInput';
+import { StyleSheet, View } from 'react-native';
+import * as Font from 'expo-font';
+import { AppLoading } from 'expo';
+import MealsNavigator from './navigation/MealsNavigator';
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'open-sans': require('./assets/fonts/OpenSans-Regular.ttf'),
+    'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf'),
+  });
+}
 
 export default function App() {
-  const [courseGoals, setCourseGoals] = useState([]);
-  const [isAddMode, setIsAddMode] = useState(false);
+  const [fontLoaded, setFontLoaded] = useState(false);
+
+  if (!fontLoaded) {
+    return ( 
+        <AppLoading 
+          startAsync={fetchFonts} 
+          onFinish={() => setFontLoaded(true)}
+        />
+    );
+  }
   
-  const addGoalHandler = goal => {
-    setCourseGoals(currentGoals => [
-      ...currentGoals, 
-      { id: Math.random().toString(), value: goal }
-    ]);
-    setIsAddMode(false);
-  }
-
-  const removeGoalHandler = goalId => {
-    setCourseGoals(currentGoals => {
-        return currentGoals.filter((goal) => goal.id !== goalId);
-    });
-  }
-
-  const cancelGoalAdditionHandler = () => {
-    setIsAddMode(false);
-  }
-
   return (
-    <View style={styles.container}>
-      <Button title="Add New Goal" onPress={() => setIsAddMode(true)}/>
-      <GoalInput 
-        visible={isAddMode} 
-        addGoalHandler={addGoalHandler} 
-        onCancel={cancelGoalAdditionHandler}
-      />
-      <FlatList 
-        keyExtractor={(item, index) => item.id}
-        data={courseGoals}
-        renderItem={itemData => (
-          <GoalItem
-            id={itemData.item.id}
-            onDelete={removeGoalHandler} 
-            title={itemData.item.value}
-          />
-        )}
-      />
-    </View>
+    <MealsNavigator />
   );
 }
 
