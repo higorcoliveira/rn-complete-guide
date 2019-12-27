@@ -1,55 +1,48 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, Button } from 'react-native';
-import GoalItem from './components/GoalItem';
-import GoalInput from './components/GoalInput';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import { AppLoading } from 'expo';
+import * as Font from 'expo-font';
+// import { composeWithDevTools } from 'redux-devtools-extension'; for debug
+
+import productsReducer from './store/reducers/products';
+import cartReducer from './store/reducers/cart';
+import ordersReducer from './store/reducers/orders';
+import ShopNavigator from './navigation/ShopNavigator';
+
+// nomes das porções do estado que são utilizados no acesso com useState()
+const rootReducer = combineReducers({
+  products: productsReducer,
+  cart: cartReducer,
+  orders: ordersReducer
+});
+
+// const store = createStore(rootReducer, composeWithDevTools()); for debug
+const store = createStore(rootReducer);
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'open-sans': require('./assets/fonts/OpenSans-Regular.ttf'),
+    'open-sans-bold': require('./assets/fonts/OpenSans-Bold.ttf')
+  });
+};
 
 export default function App() {
-  const [courseGoals, setCourseGoals] = useState([]);
-  const [isAddMode, setIsAddMode] = useState(false);
-  
-  const addGoalHandler = goal => {
-    setCourseGoals(currentGoals => [
-      ...currentGoals, 
-      { id: Math.random().toString(), value: goal }
-    ]);
-    setIsAddMode(false);
-  }
+  const [fontLoaded, setFontLoaded] = useState(false);
 
-  const removeGoalHandler = goalId => {
-    setCourseGoals(currentGoals => {
-        return currentGoals.filter((goal) => goal.id !== goalId);
-    });
+  if (!fontLoaded) {
+    return (
+      <AppLoading
+        startAsync={fetchFonts}
+        onFinish={() => {
+          setFontLoaded(true);
+        }}
+      />
+    );
   }
-
-  const cancelGoalAdditionHandler = () => {
-    setIsAddMode(false);
-  }
-
   return (
-    <View style={styles.container}>
-      <Button title="Add New Goal" onPress={() => setIsAddMode(true)}/>
-      <GoalInput 
-        visible={isAddMode} 
-        addGoalHandler={addGoalHandler} 
-        onCancel={cancelGoalAdditionHandler}
-      />
-      <FlatList 
-        keyExtractor={(item, index) => item.id}
-        data={courseGoals}
-        renderItem={itemData => (
-          <GoalItem
-            id={itemData.item.id}
-            onDelete={removeGoalHandler} 
-            title={itemData.item.value}
-          />
-        )}
-      />
-    </View>
+    <Provider store={store}>
+      <ShopNavigator />
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 50
-  }
-});
