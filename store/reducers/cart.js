@@ -4,7 +4,7 @@ import CartItem from '../../models/cart-item';
 import { DELETE_PRODUCT } from '../actions/products';
 
 const initialState = {
-  items: {}, // id will gonna be the key of products inside cart
+  items: {},
   totalAmount: 0
 };
 
@@ -25,7 +25,7 @@ export default (state = initialState, action) => {
           prodTitle,
           state.items[addedProduct.id].sum + prodPrice
         );
-      } else { // add a item in the cart
+      } else {
         updatedOrNewCartItem = new CartItem(1, prodPrice, prodTitle, prodPrice);
       }
       return {
